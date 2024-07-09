@@ -27,5 +27,14 @@ RUN set -x \
   && ln -s /opt/prometheus/system/supervisor.ini /etc/supervisord.d/prometheus.ini \
   && history -c
 
+# Copy the Prometheus configuration file into the image
+COPY prometheus.yml /usr/local/lib/prometheus/prometheus.yml
+
+# Expose the Prometheus port
+EXPOSE 9090
+
 # Set default work directory.
 WORKDIR /opt/prometheus
+
+# Command to run Prometheus with the configuration file
+CMD ["/usr/local/lib/prometheus/prometheus", "--config.file=/usr/local/lib/prometheus/prometheus.yml"]
