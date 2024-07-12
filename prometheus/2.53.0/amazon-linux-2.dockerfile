@@ -4,32 +4,35 @@ FROM sloopstash/base:v1.1.1
 # Install system packages.
 RUN yum install -y xz
 
-# Install prometheus
+# Install Prometheus
 WORKDIR /tmp
 RUN set -x \
   && wget https://github.com/prometheus/prometheus/releases/download/v2.53.0/prometheus-2.53.0.linux-amd64.tar.gz --quiet \
   && tar vxf prometheus-2.53.0.linux-amd64.tar.gz > /dev/null \
-  && mkdir /usr/local/lib/prometheus \
-  && cd prometheus*/ \
-  && cp -r prometheus-2.53.0/* /usr/local/lib/prometheus/ \
-  && rm -rf prometheus-2.53.0*
+  && mkdir -p /usr/local/bin \
+  && mv prometheus-2.53.0.linux-amd64/prometheus /usr/local/bin/ \
+  && mv prometheus-2.53.0.linux-amd64/promtool /usr/local/bin/ \
+  && mv prometheus-2.53.0.linux-amd64/console_libraries /usr/local/share/prometheus/ \
+  && mv prometheus-2.53.0.linux-amd64/consoles /usr/local/share/prometheus/ \
+  && rm -rf prometheus-2.53.0.linux-amd64* prometheus-2.53.0.linux-amd64.tar.gz
 
-# Create prometheus directories.
-WORKDIR ../
+# Create Prometheus directories.
 RUN set -x \
-  && rm -rf prometheus-2.53.0* \
-  && mkdir /opt/prometheus \
-  && mkdir /opt/prometheus/data \
-  && mkdir /opt/prometheus/log \
-  && mkdir /opt/prometheus/conf \
-  && mkdir /opt/prometheus/script \
-  && mkdir /opt/prometheus/system \
+  && mkdir -p /opt/prometheus/data \
+  && mkdir -p /opt/prometheus/log \
+  && mkdir -p /opt/prometheus/conf \
+  && cp /prometheus.yml /opt/prometheus/conf/prometheus.yml \
+  && chmod 644 /opt/prometheus/conf/prometheus.yml \
+  && mkdir -p /opt/prometheus/script \
+  && mkdir -p /opt/prometheus/system \
   && touch /opt/prometheus/system/server.pid \
   && touch /opt/prometheus/system/supervisor.ini \
   && ln -s /opt/prometheus/system/supervisor.ini /etc/supervisord.d/prometheus.ini \
   && history -c
 
-
 # Set default work directory.
 WORKDIR /opt/prometheus
 
+# Run Prometheus
+ENTRYPOINT ["/usr/local/bin/prometheus"]
+CMD ["--config.file=/opt/prometheus/conf/prometheus.yml", "--storage.tsdb.path=/opt/prometheus/data"]
