@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  redis:
+    image: siva/redis:v7.2.5
+    entrypoint: /usr/bin/supervisord
+    command: "-c /etc/supervisord.conf"
+    ports: 
+      - "${REDIS_PORT}:3000"
+    volumes:
+      - redis-data:/opt/redis/data
+      - redis-log:/opt/redis/log
+      - /opt/kickstart-docker/workload/supervisor/conf/server.conf:/etc/supervisord.conf
+      - ${HOME_DIR}/workload/redis/${REDIS_VERSION}/conf/supervisor.ini:/opt/redis/system/supervisor.ini
+      - ${HOME_DIR}/workload/redis/${REDIS_VERSION}/conf/redis.conf:/opt/redis/conf/redis.conf
+    networks:
+      common:
+        ipv4_address: ${REDIS_IP}
+volumes:
+  redis-data:
+    driver: local
+  redis-log:
+    driver: local
+networks:
+  common:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${REDIS_NETWORK}
