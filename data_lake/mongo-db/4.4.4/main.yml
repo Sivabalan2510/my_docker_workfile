@@ -1,0 +1,70 @@
+version: '4.0'
+services:
+  mongo-1:
+    image: sloopstash/mongo-db:v4.4.4
+    entrypoint: /usr/bin/supervisord
+    command: "-c /etc/supervisord.conf"
+    ports:
+      - "${MONGODB1_PORT}:27017"
+    volumes:
+      - mongo-db-1-data:/opt/mongo-db/data
+      - mongo-db-1-log:/opt/mongo-db/log
+      - /opt/kickstart-docker/workload/supervisor/conf/server.conf:/etc/supervisord.conf
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/supervisor.ini:/opt/mongo-db/system/supervisor.ini
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/server.conf:/opt/mongo-db/conf/server.conf
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/init-replica-set.sh:/opt/mongo-db/script/init-replica-set.sh
+    networks:
+      - common
+  mongo-2:
+    image: sloopstash/mongo-db:v4.4.4
+    entrypoint: /usr/bin/supervisord
+    command: "-c /etc/supervisord.conf"
+    ports:
+      - "${MONGODB2_PORT}:27017"
+    volumes:
+      - mongo-db-2-data:/opt/mongo-db/data
+      - mongo-db-2-log:/opt/mongo-db/log
+      - /opt/kickstart-docker/workload/supervisor/conf/server.conf:/etc/supervisord.conf
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/supervisor.ini:/opt/mongo-db/system/supervisor.ini
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/server.conf:/opt/mongo-db/conf/server.conf
+    depends_on:
+      - mongo-1
+    networks:
+      - common
+  mongo-3:
+    image: sloopstash/mongo-db:v4.4.4
+    entrypoint: /usr/bin/supervisord
+    command: "-c /etc/supervisord.conf"
+    ports:
+      - "${MONGODB3_PORT}:27017"
+    volumes:
+      - mongo-db-3-data:/opt/mongo-db/data
+      - mongo-db-3-log:/opt/mongo-db/log
+      - /opt/kickstart-docker/workload/supervisor/conf/server.conf:/etc/supervisord.conf
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/supervisor.ini:/opt/mongo-db/system/supervisor.ini
+      - /opt/kickstart-docker/workload/mongo-db/${MONGODB_VERSION4}/conf/server.conf:/opt/mongo-db/conf/server.conf
+    depends_on:
+      - mongo-1
+    networks:
+      - common
+    
+volumes:
+  mongo-db-1-data:
+    driver: local
+  mongo-db-1-log:
+    driver: local
+  mongo-db-2-data:
+    driver: local
+  mongo-db-2-log:
+    driver: local
+  mongo-db-3-data:
+    driver: local
+  mongo-db-3-log:
+    driver: local
+networks:
+  common:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: ${MONGODB_NETWORK}
