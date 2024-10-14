@@ -4,7 +4,7 @@ pipeline {
         stage('Clone') {
             steps {
                 echo 'Cloning the repository...'
-                git url: 'https://github.com/your-username/your-repo.git', credentialsId: 'your-credential-id'
+                git url: 'https://github.com/Sivabalan2510/my_docker_workfile', credentialsId: 'Sivabalan2510'
             }
         }
         stage('Build') {
